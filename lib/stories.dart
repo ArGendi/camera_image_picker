@@ -11,7 +11,8 @@ class Stories extends StatefulWidget {
 
 class _StoriesState extends State<Stories> {
   List<String> names = ["Abdo", "Mohamed", "Ahmed", "Mariam", "Farah", "Mai"];
-
+  bool isViewed = false;
+  List<int> indexesViewed = [];
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -62,16 +63,31 @@ class _StoriesState extends State<Stories> {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, i){
                 return InkWell(
+                  onTap: (){
+                    setState(() {
+                      indexesViewed.add(i);
+                    });
+                  },
                   onDoubleTap: (){
                     setState(() {
+                      indexesViewed.remove(i);
                       names.removeAt(i);
                     });
                   },
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.grey[(i+1) * 100],
+                      AnimatedContainer(
+                        duration: Duration(seconds: 1),
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(
+                            width: 4,
+                            color: indexesViewed.contains(i)?Colors.grey : Colors.green,
+                          )
+                        ),
                       ),
                       SizedBox(height: 5,),
                       Text(names[i])
