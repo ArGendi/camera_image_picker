@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_nasr_52/single_story.dart';
 
 class Stories extends StatefulWidget {
   const Stories({super.key});
@@ -9,10 +10,34 @@ class Stories extends StatefulWidget {
   State<Stories> createState() => _StoriesState();
 }
 
-class _StoriesState extends State<Stories> {
+class _StoriesState extends State<Stories> with TickerProviderStateMixin{
   List<String> names = ["Abdo", "Mohamed", "Ahmed", "Mariam", "Farah", "Mai"];
-  bool isViewed = false;
   List<int> indexesViewed = [];
+  List<int> indexesViewed2 = [];
+  late Animation<Offset> animation;
+  late Animation<Offset> animation2;
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 3),
+    );
+
+    animation = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0,3),
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCirc));
+
+     animation2 = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCirc));
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -64,34 +89,43 @@ class _StoriesState extends State<Stories> {
               itemBuilder: (context, i){
                 return InkWell(
                   onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SingleStory(name: names[i])));
+                  },
+                  onDoubleTap: (){
                     setState(() {
                       indexesViewed.add(i);
                     });
                   },
-                  onDoubleTap: (){
+                  onLongPress: () async{
+                    indexesViewed2.add(i);
+                    await controller.forward();
                     setState(() {
+                      indexesViewed2.removeAt(i);
                       indexesViewed.remove(i);
                       names.removeAt(i);
                     });
                   },
-                  child: Column(
-                    children: [
-                      AnimatedContainer(
-                        duration: Duration(seconds: 1),
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(
-                            width: 4,
-                            color: indexesViewed.contains(i)?Colors.grey : Colors.green,
-                          )
+                  child: SlideTransition(
+                    position: indexesViewed2.contains(i) ? animation : animation2,
+                    child: Column(
+                      children: [
+                        AnimatedContainer(
+                          duration: Duration(seconds: 1),
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                              width: 4,
+                              color: indexesViewed.contains(i)?Colors.grey : Colors.green,
+                            )
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 5,),
-                      Text(names[i])
-                    ],
+                        SizedBox(height: 5,),
+                        Hero( tag: names[i], child: Text(names[i]))
+                      ],
+                    ),
                   ),
                 );
               }, 
